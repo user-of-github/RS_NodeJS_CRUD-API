@@ -7,7 +7,7 @@ import { isPathNameWithParam, readBody } from './utils';
 
 export const handleApiRequest = async (pathname: string, database: Database, request: IncomingMessage, response: ServerResponse): Promise<void> => {
   const { method } = request;
-  console.log(pathname)
+  console.log(pathname);
 
   switch (true) {
     case pathname === usersEndpointBase : {

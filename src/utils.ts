@@ -23,5 +23,5 @@ export const readBody = async (request: IncomingMessage): Promise<unknown> => {
       const parsed = JSON.parse(body);
       resolve(parsed);
     });
-  })
+  });
 };

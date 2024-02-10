@@ -15,7 +15,7 @@ export const handleApiRequest = async (pathname: string, database: Database, req
           break;
         }
         case 'POST': {
-          await createNewUser(database, request, response)
+          await createNewUser(database, request, response);
           break;
         }
         default: {
@@ -26,13 +26,13 @@ export const handleApiRequest = async (pathname: string, database: Database, req
     }
     case isPathNameWithParam(pathname, usersEndpointBase): {
       switch (method) {
-      case 'GET': {
+        case 'GET': {
           break;
         }
-      case 'POST': {
+        case 'POST': {
           break;
         }
-      default: {
+        default: {
           break;
         }
       }

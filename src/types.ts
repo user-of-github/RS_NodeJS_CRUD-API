@@ -1,5 +1,3 @@
-import { it } from 'node:test';
-
 export interface UserRaw {
   username: string;
   age: number;

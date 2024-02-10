@@ -1,8 +1,8 @@
-import stylisticJs from '@stylistic/eslint-plugin-js';
-import stylisticTs from '@stylistic/eslint-plugin-ts';
-import parserTs from '@typescript-eslint/parser';
+const stylisticJs = require('@stylistic/eslint-plugin-js');
+const stylisticTs = require('@stylistic/eslint-plugin-ts');
+const parserTs = require('@typescript-eslint/parser');
 
-export default [{
+module.exports = [{
   plugins: {
     '@stylistic/js': stylisticJs,
     '@stylistic/ts': stylisticTs

@@ -13,10 +13,9 @@ const server = http.createServer(async (request, response) => {
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Headers', '*');
 
-  const url = new URL(request.url || '');
-  const pathname = url.pathname;
-  await handleApiRequest(pathname, database, request, response);
+  await handleApiRequest(request.url, database, request, response);
 });
 
 
 server.listen(port);
+console.log(`Server listening on port ${port}`);

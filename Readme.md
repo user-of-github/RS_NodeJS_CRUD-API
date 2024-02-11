@@ -28,4 +28,15 @@ Validators check it and will not allow to create user for example with hobbies: 
   - __Important__: Fields will be updated only if validation rules are applied.
   - For example if you send `{"username": 123}` - there will be no update.
   - Or if you send `{"username": "New Name", age: "NOT AN AGE"}` — only `username` will be updated
-- __*DELETE*__:
+- __*DELETE*__: Deletes user and returns `204` status. If user not found - returns `404`. If provided uuid is not actual UUID - returns `400`
+
+___  
+### Used:  
+- _**Language**: [TypeScript](https://www.typescriptlang.org/)_  
+- _**Linting and formatting**: [ESLint](https://eslint.org/) with modern flat config and [ESLint.style](https://eslint.style/) for rules & formatting_
+- _**Testing**: [Jest](https://jestjs.io/) and [SuperTest](https://www.npmjs.com/package/supertest) for testing API_
+___  
+
+###### Copyright 2024
+###### Created by [@user-of-github](https://github.com/user-of-github)  
+###### Inspired by Rolling Scopes and RS NodeJS 2024 Q1

@@ -1,7 +1,7 @@
 import { ServerResponse, IncomingMessage } from 'http';
 import { v4, validate as validateUUID } from 'uuid';
 import { Database } from './types';
-import { StatusCode, usersEndpointBase } from './constants';
+import { StatusCode, usersEndpointBase, userTypeDescriptionForError } from './constants';
 import { extractParam, isPathNameWithParam, readBody } from './utils';
 import { hasAgeTypeGuard, hasHobbiesTypeGuard, hasUsernameTypeGuard, userRawTypeGuard, userRawTypeGuardPartial } from './validators';
 
@@ -9,49 +9,59 @@ import { hasAgeTypeGuard, hasHobbiesTypeGuard, hasUsernameTypeGuard, userRawType
 export const handleApiRequest = async (pathname: string, database: Database, request: IncomingMessage, response: ServerResponse): Promise<void> => {
   const { method } = request;
 
-  switch (true) {
-    case pathname === usersEndpointBase : {
-      switch (method) {
-        case 'GET': {
-          getAllUsers(database, response);
-          break;
+  try {
+    switch (true) {
+      case pathname === usersEndpointBase : {
+        switch (method) {
+          case 'GET': {
+            getAllUsers(database, response);
+            break;
+          }
+          case 'POST': {
+            await createNewUser(database, request, response);
+            break;
+          }
+          default: {
+            sendNotFound(response);
+            break;
+          }
         }
-        case 'POST': {
-          await createNewUser(database, request, response);
-          break;
-        }
-        default: {
-          sendNotFound(response);
-          break;
-        }
+        break;
       }
-      break;
-    }
 
-    case isPathNameWithParam(pathname, usersEndpointBase): {
-      switch (method) {
-        case 'GET': {
-          const param = extractParam(pathname, usersEndpointBase);
-          getUser(param, database, response);
-          break;
+      case isPathNameWithParam(pathname, usersEndpointBase): {
+        switch (method) {
+          case 'GET': {
+            const param = extractParam(pathname, usersEndpointBase);
+            getUser(param, database, response);
+            break;
+          }
+          case 'PUT': {
+            const param = extractParam(pathname, usersEndpointBase);
+            await updateUser(database, request, param, response);
+            break;
+          }
+          case 'DELETE': {
+            const param = extractParam(pathname, usersEndpointBase);
+            deleteUser(database, param, response);
+            break;
+          }
+          default: {
+            sendNotFound(response);
+            break;
+          }
         }
-        case 'PUT': {
-          const param = extractParam(pathname, usersEndpointBase);
-          await updateUser(database, request, param, response);
-          break;
-        }
-        default: {
-          sendNotFound(response);
-          break;
-        }
+        break;
       }
-      break;
-    }
 
-    default: {
-      sendNotFound(response);
-      break;
+      default: {
+        sendNotFound(response);
+        break;
+      }
     }
+  } catch (error) {
+    response.statusCode = StatusCode.SERVER_ERROR;
+    response.end(`Some error occurred on server. Error message: ${error}`)
   }
 };
 
@@ -65,7 +75,7 @@ const createNewUser = async (database: Database, request: IncomingMessage, respo
 
   if (!userRawTypeGuard(body)) {
     response.statusCode = StatusCode.BAD_REQUEST;
-    response.end('Request body does not contain required fields. Values for keys should also satisfy requirements: { username: string, age: number, hobbies: string[])');
+    response.end(`Request body does not contain required fields. ${userTypeDescriptionForError}`);
   } else {
     const newUser = {
       ...body, id: v4()
@@ -80,6 +90,7 @@ const updateUser = async (database: Database, request: IncomingMessage, userId: 
   if (!validateUUID(userId)) {
     response.statusCode = StatusCode.BAD_REQUEST;
     response.end(`Provided parameter userId ${userId} is invalid (not uuid)`);
+    return;
   }
 
   const currentUserIndex = database.users.findIndex(user => user.id === userId);
@@ -87,13 +98,15 @@ const updateUser = async (database: Database, request: IncomingMessage, userId: 
   if (currentUserIndex === -1) {
     response.statusCode = StatusCode.NOT_FOUND;
     response.end(`User with provided id ${userId} does not exist`);
+    return;
   }
 
   const body = await readBody(request);
 
   if (!userRawTypeGuardPartial(body)) {
     response.statusCode = StatusCode.BAD_REQUEST;
-    response.end(`Provided object to update user should contain at least one of updated parameters with keys username, age, hobbies. Values for keys should also satisfy requirements: { username: string, age: number, hobbies: string[])`);
+    response.end(`Provided object to update user should contain at least one of updated parameters with keys username, age, hobbies. ${userTypeDescriptionForError}`);
+    return;
   } else {
     if (hasUsernameTypeGuard(body)) {
       database.users[currentUserIndex].username = body.username;
@@ -110,7 +123,6 @@ const updateUser = async (database: Database, request: IncomingMessage, userId: 
     response.statusCode = StatusCode.OK;
     response.end(JSON.stringify(database.users[currentUserIndex]));
   }
-
 };
 
 const sendNotFound = (response: ServerResponse) => {
@@ -123,6 +135,7 @@ const getUser = (userId: string, database: Database, response: ServerResponse): 
   if (!validateUUID(userId)) {
     response.statusCode = StatusCode.BAD_REQUEST;
     response.end(`Provided parameter userId ${userId} is invalid (not uuid)`);
+    return;
   }
 
   const user = database.users.find(user => user.id === userId);
@@ -130,8 +143,30 @@ const getUser = (userId: string, database: Database, response: ServerResponse): 
   if (!user) {
     response.statusCode = StatusCode.NOT_FOUND;
     response.end(`User with provided id ${userId} does not exist`);
+    return;
   }
 
   response.statusCode = StatusCode.OK;
   response.end(JSON.stringify(user));
+};
+
+const deleteUser = (database: Database, userId: string, response: ServerResponse): void => {
+  if (!validateUUID(userId)) {
+    response.statusCode = StatusCode.BAD_REQUEST;
+    response.end(`Provided parameter userId ${userId} is invalid (not uuid)`);
+  }
+
+  const currentUserIndex = database.users.findIndex(user => user.id === userId);
+
+  if (currentUserIndex === -1) {
+    response.statusCode = StatusCode.NOT_FOUND;
+    response.end(`User with provided id ${userId} does not exist`);
+    return;
+  }
+
+
+  database.users.splice(currentUserIndex, 1);
+
+  response.statusCode = StatusCode.OK_RESOURCE_DELETED;
+  response.end();
 };

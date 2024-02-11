@@ -4,17 +4,19 @@ export const objectTypeGuard = (item: unknown): item is object => {
   if (item === null) {
     return false;
   }
+
   if (typeof item !== 'object') {
     return false;
   }
 
   return true;
-}
+};
 
 export const hasUsernameTypeGuard = (parentObject: object): parentObject is { username: string } => {
   if (!('username' in parentObject)) {
     return false;
   }
+
   if (typeof parentObject.username !== 'string') {
     return false;
   }
@@ -28,6 +30,10 @@ export const hasAgeTypeGuard = (parentObject: object): parentObject is { age: nu
   }
 
   if (typeof parentObject.age !== 'number') {
+    return false;
+  }
+
+  if (parentObject.age < 0 || parentObject.age > 200) {
     return false;
   }
 
@@ -65,3 +71,4 @@ export const userRawTypeGuardPartial = (item: unknown): item is Partial<UserRaw>
 
   return userTypeValidators.some(validator => validator(item));
 };
+

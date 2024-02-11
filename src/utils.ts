@@ -14,7 +14,7 @@ export const extractParam = (requestPathname: string, baseApiPathname: string): 
 };
 
 export const readBody = async (request: IncomingMessage): Promise<unknown> => {
-  return await new Promise(resolve => {
+  return await new Promise((resolve, reject) => {
     let body = '';
 
     request.on('data', chunk => {
@@ -27,7 +27,7 @@ export const readBody = async (request: IncomingMessage): Promise<unknown> => {
         resolve(parsed);
       } catch {
         console.error(`Unable to parse JSON from ${body}`);
-        resolve({});
+        reject(new Error(`Unable to parse JSON from ${body}`));
       }
     });
   });

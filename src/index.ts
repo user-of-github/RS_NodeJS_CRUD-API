@@ -1,5 +1,5 @@
 import http from 'http';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 import { createDatabase } from './database';
 import { handleApiRequest } from './api';
 import { defaultPort } from './constants';
@@ -22,3 +22,5 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(port);
 console.log(`Server listening on port ${port}`);
+
+export { server };

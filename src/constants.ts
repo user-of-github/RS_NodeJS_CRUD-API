@@ -1,4 +1,5 @@
 export const usersEndpointBase = '/api/users';
+export const usersEndpointBaseWithSlash = '/api/users/';
 
 export const enum StatusCode {
   OK = 200,

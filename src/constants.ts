@@ -9,4 +9,6 @@ export const enum StatusCode {
   SERVER_ERROR = 500
 }
 
-export const userTypeDescriptionForError = 'Values for keys should also satisfy requirements: { username: string, age: number, hobbies: string[]). Age must be in range 0..200'
+export const userTypeDescriptionForError = 'Values for keys should also satisfy requirements: { username: string, age: number, hobbies: string[]). Age must be in range 0..200';
+
+export const defaultPort = 3000;

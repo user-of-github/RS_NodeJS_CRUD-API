@@ -61,7 +61,7 @@ export const handleApiRequest = async (pathname: string, database: Database, req
     }
   } catch (error) {
     response.statusCode = StatusCode.SERVER_ERROR;
-    response.end(`Some error occurred on server. Error message: ${error}`)
+    response.end(`Some error occurred on server. Error message: ${error}`);
   }
 };
 

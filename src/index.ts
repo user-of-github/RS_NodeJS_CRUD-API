@@ -1,9 +1,12 @@
 import http from 'http';
+import dotenv from 'dotenv'
 import { createDatabase } from './database';
 import { handleApiRequest } from './api';
+import { defaultPort } from './constants';
 
+dotenv.config();
 
-const port = 8000;
+const port = process.env.PORT || defaultPort;
 
 const database = createDatabase();
 

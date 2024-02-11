@@ -1,13 +1,13 @@
 import { ServerResponse, IncomingMessage } from 'http';
-import { v4 } from 'uuid';
-import { Database, userRawTypeGuard } from './types';
+import { v4, validate as validateUUID } from 'uuid';
+import { Database } from './types';
 import { StatusCode, usersEndpointBase } from './constants';
-import { isPathNameWithParam, readBody } from './utils';
+import { extractParam, isPathNameWithParam, readBody } from './utils';
+import { hasAgeTypeGuard, hasHobbiesTypeGuard, hasUsernameTypeGuard, userRawTypeGuard, userRawTypeGuardPartial } from './validators';
 
 
 export const handleApiRequest = async (pathname: string, database: Database, request: IncomingMessage, response: ServerResponse): Promise<void> => {
   const { method } = request;
-  console.log(pathname);
 
   switch (true) {
     case pathname === usersEndpointBase : {
@@ -31,9 +31,13 @@ export const handleApiRequest = async (pathname: string, database: Database, req
     case isPathNameWithParam(pathname, usersEndpointBase): {
       switch (method) {
         case 'GET': {
+          const param = extractParam(pathname, usersEndpointBase);
+          getUser(param, database, response);
           break;
         }
-        case 'POST': {
+        case 'PUT': {
+          const param = extractParam(pathname, usersEndpointBase);
+          await updateUser(database, request, param, response);
           break;
         }
         default: {
@@ -61,7 +65,7 @@ const createNewUser = async (database: Database, request: IncomingMessage, respo
 
   if (!userRawTypeGuard(body)) {
     response.statusCode = StatusCode.BAD_REQUEST;
-    response.end('Request body does not contain required fields');
+    response.end('Request body does not contain required fields. Values for keys should also satisfy requirements: { username: string, age: number, hobbies: string[])');
   } else {
     const newUser = {
       ...body, id: v4()
@@ -72,7 +76,62 @@ const createNewUser = async (database: Database, request: IncomingMessage, respo
   }
 };
 
+const updateUser = async (database: Database, request: IncomingMessage, userId: string, response: ServerResponse): Promise<void> => {
+  if (!validateUUID(userId)) {
+    response.statusCode = StatusCode.BAD_REQUEST;
+    response.end(`Provided parameter userId ${userId} is invalid (not uuid)`);
+  }
+
+  const currentUserIndex = database.users.findIndex(user => user.id === userId);
+
+  if (currentUserIndex === -1) {
+    response.statusCode = StatusCode.NOT_FOUND;
+    response.end(`User with provided id ${userId} does not exist`);
+  }
+
+  const body = await readBody(request);
+
+  if (!userRawTypeGuardPartial(body)) {
+    response.statusCode = StatusCode.BAD_REQUEST;
+    response.end(`Provided object to update user should contain at least one of updated parameters with keys username, age, hobbies. Values for keys should also satisfy requirements: { username: string, age: number, hobbies: string[])`);
+  } else {
+    if (hasUsernameTypeGuard(body)) {
+      database.users[currentUserIndex].username = body.username;
+    }
+
+    if (hasAgeTypeGuard(body)) {
+      database.users[currentUserIndex].age = body.age;
+    }
+
+    if (hasHobbiesTypeGuard(body)) {
+      database.users[currentUserIndex].hobbies = body.hobbies;
+    }
+
+    response.statusCode = StatusCode.OK;
+    response.end(JSON.stringify(database.users[currentUserIndex]));
+  }
+
+};
+
 const sendNotFound = (response: ServerResponse) => {
   response.statusCode = StatusCode.NOT_FOUND;
   response.end('Endpoint (or request method for this endpoint) is not found');
+};
+
+
+const getUser = (userId: string, database: Database, response: ServerResponse): void => {
+  if (!validateUUID(userId)) {
+    response.statusCode = StatusCode.BAD_REQUEST;
+    response.end(`Provided parameter userId ${userId} is invalid (not uuid)`);
+  }
+
+  const user = database.users.find(user => user.id === userId);
+
+  if (!user) {
+    response.statusCode = StatusCode.NOT_FOUND;
+    response.end(`User with provided id ${userId} does not exist`);
+  }
+
+  response.statusCode = StatusCode.OK;
+  response.end(JSON.stringify(user));
 };

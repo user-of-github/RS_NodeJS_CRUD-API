@@ -72,7 +72,7 @@ describe('#1 First scenario with usual flow', () => {
 });
 
 
-describe('#2 Second scenario with testing more-cases (without validation)', () => {
+describe('#2 Second scenario with testing more errored-cases (without validation)', () => {
   afterAll(() => {
     server.close();
     server.closeIdleConnections();
@@ -108,6 +108,11 @@ describe('#2 Second scenario with testing more-cases (without validation)', () =
 
     const res4 = await request(server).get(`${usersEndpointBase}/${userId}`);
     expect(res4.statusCode).toStrictEqual(StatusCode.NOT_FOUND);
+  });
+
+  test('Returns status code 500', async () => {
+    const res = await request(server).post(usersEndpointBase).send('NOT_JSON');
+    expect(res.statusCode).toBe(StatusCode.SERVER_ERROR);
   });
 });
 

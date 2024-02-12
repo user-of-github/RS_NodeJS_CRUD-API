@@ -6,7 +6,10 @@ import { extractParam, isPathNameWithParam, readBody } from './utils';
 import { hasAgeTypeGuard, hasHobbiesTypeGuard, hasUsernameTypeGuard, userRawTypeGuard, userRawTypeGuardPartial } from './validators';
 
 
-export const handleApiRequest = async (pathname: string, database: Database, request: IncomingMessage, response: ServerResponse): Promise<void> => {
+/**
+Return type boolean - because modified it for start:multi to show when data is updated
+ */
+export const handleApiRequest = async (pathname: string, database: Database, request: IncomingMessage, response: ServerResponse): Promise<boolean> => {
   const { method } = request;
 
   try {
@@ -15,18 +18,18 @@ export const handleApiRequest = async (pathname: string, database: Database, req
         switch (method) {
           case 'GET': {
             getAllUsers(database, response);
-            break;
+            return false;
           }
           case 'POST': {
             await createNewUser(database, request, response);
-            break;
+            return true;
           }
           default: {
             sendNotFound(response);
-            break;
+            return false;
           }
         }
-        break;
+        return false;
       }
 
       case isPathNameWithParam(pathname, usersEndpointBase): {
@@ -34,34 +37,35 @@ export const handleApiRequest = async (pathname: string, database: Database, req
           case 'GET': {
             const param = extractParam(pathname, usersEndpointBase);
             getUser(param, database, response);
-            break;
+            return false;
           }
           case 'PUT': {
             const param = extractParam(pathname, usersEndpointBase);
             await updateUser(database, request, param, response);
-            break;
+            return true;
           }
           case 'DELETE': {
             const param = extractParam(pathname, usersEndpointBase);
             deleteUser(database, param, response);
-            break;
+            return true;
           }
           default: {
             sendNotFound(response);
-            break;
+            return false;
           }
         }
-        break;
+        return false;
       }
 
       default: {
         sendNotFound(response);
-        break;
+        return false;
       }
     }
   } catch (error) {
     response.statusCode = StatusCode.SERVER_ERROR;
     response.end(JSON.stringify({error:`Some error occurred on server. Error message: ${error}`}));
+    return false;
   }
 };
 

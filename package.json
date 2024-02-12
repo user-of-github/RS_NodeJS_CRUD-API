@@ -5,8 +5,9 @@
   "scripts": {
     "start:dev": "ts-node-dev ./src/index.ts",
     "start:prod": "npm run build & node ./dist/index.js",
+    "start:multi": "ts-node-dev ./src/multi/index-multi.ts",
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --silent",
     "format": "npx eslint . --config eslint.config.js --fix"
   },
   "keywords": [],

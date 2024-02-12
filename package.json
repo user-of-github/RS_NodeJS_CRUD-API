@@ -1,15 +1,42 @@
 {
-  "name": "crud-api",
+  "name": "rs-school-crud-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Rolling Scopes Task CRUD-API",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "ts-node-dev ./src/index.ts",
+    "start:prod": "npm run build & node ./dist/index.js",
+    "start:multi": "ts-node-dev ./src/multi/index-multi.ts",
+    "build": "webpack --mode=production",
+    "test": "jest --silent",
+    "format": "npx eslint . --config eslint.config.js --fix"
   },
   "keywords": [],
   "author": {
     "name": "Slutski Mikita",
     "url": "https://github.com/user-of-github"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^1.6.1",
+    "@stylistic/eslint-plugin-ts": "^1.6.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.17",
+    "@types/supertest": "^6.0.2",
+    "@types/uuid": "^9.0.8",
+    "@typescript-eslint/parser": "^6.21.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.1.2",
+    "ts-loader": "^9.4.4",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.2",
+    "uuid": "^9.0.1"
+  }
 }

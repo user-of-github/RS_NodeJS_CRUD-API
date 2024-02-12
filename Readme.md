@@ -1,7 +1,7 @@
 # RS School Node.js CRUD-API  
 ___  
 ## Launch manual  
-- Node.js 20 required
+- __Node.js 20 required__
 - `npm install`  
 - To run server: `npm start:dev`
 - Test with Postman   
@@ -9,6 +9,7 @@ ___
 - To build: `npm run build`  
 - To build and run built prod version: `npm run start:prod`  
 - To run tests: `npm run test`  
+- Also you can try option with `npm run start:multi`. It is launched in dev mode. Starts N workers for clustering (in my case: 16) - and they are listening to requests as well as main port. 
 
 ___  
 ## API Manual:  
@@ -29,8 +30,19 @@ Validators check it and will not allow to create user for example with hobbies: 
   - For example if you send `{"username": 123}` - there will be no update.
   - Or if you send `{"username": "New Name", age: "NOT AN AGE"}` — only `username` will be updated
 - __*DELETE*__: Deletes user and returns `204` status. If user not found - returns `404`. If provided uuid is not actual UUID - returns `400`
-
-___  
+___    
+### To test multi-server (via cluster and workers):    
+__EXAMPLE FROM ASSIGNMENT:__ _// Also can try using your own. Check out logs in console to see how it works !_
+- On `localhost:4000/api` load balancer is listening for requests
+- On `localhost:4001/api`, `localhost:4002/api`, `localhost:4003/api` workers are listening for requests from load balancer
+- When user sends request to `localhost:4000/api`, load balancer sends this request to `localhost:4001/api`, next user request is sent to `localhost:4002/api` and so on.
+- After sending request to `localhost:4003/api` load balancer starts from the first worker again (sends request to `localhost:4001/api`)
+- State of db should be consistent between different workers, for example:
+  1. First `POST` request addressed to `localhost:4001/api` creates user
+  2. Second `GET` request addressed to `localhost:4002/api` should return created user
+  3. Third `DELETE` request addressed to `localhost:4003/api` deletes created user
+  4. Fourth `GET` request addressed to `localhost:4001/api` should return **404** status code for created user
+___
 ### Used:  
 - _**Language**: [TypeScript](https://www.typescriptlang.org/)_  
 - _**Linting and formatting**: [ESLint](https://eslint.org/) with modern flat config and [ESLint.style](https://eslint.style/) for rules & formatting_

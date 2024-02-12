@@ -5,10 +5,8 @@ import dotenv from 'dotenv';
 import { Worker as ClusterWorker } from 'cluster';
 import { Database } from '../types';
 import { createDatabase } from '../database';
-
 import { defaultPort } from '../constants';
 import { WorkerMessage } from './types';
-import * as process from 'process';
 
 export const runMasterProcess = () => {
   dotenv.config();
